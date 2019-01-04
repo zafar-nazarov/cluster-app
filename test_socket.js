@@ -1,5 +1,5 @@
-const socket = require('socket.io-client')('http://localhost');
-
+const socket = require('socket.io-client')('http://127.0.0.1:8000');
+console.log('start')
 try {
     socket.on('connect', function () {
         console.log('Successfully connected to socket');
