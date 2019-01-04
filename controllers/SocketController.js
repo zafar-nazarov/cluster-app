@@ -1,10 +1,10 @@
 const EmployeeService = require('../services/EmployeeService');
 
-class EmployeeController {
+class SocketController {
     constructor() {
     }
 
-    static async getAll(req, res) {
+    static async getEmployeeList(params) {
         try {
             let employees = await EmployeeService.getAll();
             let resp = {
@@ -13,14 +13,12 @@ class EmployeeController {
                 success: true,
             };
 
-            res.json(resp);
-            res.end();
+            return resp;
 
         } catch (error) {
-            res.end();
-            return { error };
+            return { error }
         }
     }
 }
 
-module.exports = EmployeeController;
+module.exports = SocketController;

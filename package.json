@@ -2,12 +2,16 @@
   "name": "cluster-app",
   "version": "0.0.1",
   "dependencies": {
+    "async": "^2.1.4",
+    "db-migrate": "^0.11.4",
+    "db-migrate-mongodb": "^1.5.0",
     "express": "4.13.4",
     "mongodb": "^3.0.7",
     "mongoose": "^5.0.16",
     "mongoose-float": "1.0.2",
-    "async": "^2.1.4",
-    "db-migrate": "^0.11.4",
-    "db-migrate-mongodb": "^1.5.0"
+    "pidusage": "1.1.0",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
+    "underscore": "1.8.3"
   }
 }

@@ -5,7 +5,7 @@ var successCount = 0;
 var errorCount = 0;
 
 console.log('requesting...');
-var interval = setInterval(function tick() {
+var interval = setInterval( () => {
     totalCount++;
     http.get('http://localhost:8000/employees', (resp) => {
         successCount++;
