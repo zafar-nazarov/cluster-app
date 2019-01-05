@@ -3,8 +3,9 @@ const http = require('http');
 var totalCount = 0;
 var successCount = 0;
 var errorCount = 0;
+var milliseconds = 10000;
 
-console.log('requesting...');
+console.log(`requesting ${milliseconds/1000} seconds ...`);
 var interval = setInterval( () => {
     totalCount++;
     http.get('http://localhost:8000/employees', (resp) => {
@@ -19,5 +20,5 @@ setTimeout(() => {
     console.log('=== TOTAL ===', totalCount);
     console.log('=== SUCCESS ===', successCount);
     console.log('=== ERROR ===', errorCount);
-}, 15000);
+}, milliseconds);
 

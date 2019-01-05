@@ -53,32 +53,49 @@ class ApplicationClass {
             console.log(`Permanent socket connection started`);
 
             this.io.on('connection', (socket) => {
-                socket.on('employee.list', (params) => {
-                    async.map(this.worker_pids, utils.getCPU_Load, function (err, result) {
-                        let resultArrWithoutNull = _.without(result, null);
-                        let minObject = _.min(resultArrWithoutNull, function (resultArrWithoutNull) {
-                            return resultArrWithoutNull.cpu;
-                        });
-                        let worker = cluster.workers[minObject.id];
-                        worker.send({ cmd: 'employee.list', socketid: socket.id });
-                    });
+                socket.on('employee.list', async (params) => {
+
+                    if (this.isClusterMode) {
+
+                        // async.map(this.worker_pids, utils.getCPU_Load, function (err, result) {
+                        //     let resultArrWithoutNull = _.without(result, null);
+                        //     let minObject = _.min(resultArrWithoutNull, function (resultArrWithoutNull) {
+                        //         return resultArrWithoutNull.cpu;
+                        //     });
+                        //     let worker = cluster.workers[minObject.id];
+                        //     worker.send({cmd: 'employee.list', socketid: socket.id});
+                        // });
+
+                        let rand = Math.floor(Math.random() * numCPUs);
+                        let workerId = this.worker_pids[rand].id;
+                        let worker = cluster.workers[workerId];
+                        worker.send({cmd: 'employee.list', socketid: socket.id});
+
+                    }
+                    else {
+                        socket.emit('employee.list', await SocketController.getEmployeeList());
+                    }
+
+
                 })
             });
         }
     }
 
     async startWorker() {
-        cluster.worker.on('message', async (msg) => {
-            console.log('Received msg pid =', process.pid, ' Msg:', msg);
-            if (msg.cmd && msg.cmd === 'employee.list') {
-                let result = {
-                    cmd: 'employee.list.result',
-                    data: await SocketController.getEmployeeList(),
-                    socketid: msg.socketid
-                };
-                cluster.worker.send(result);
-            }
-        });
+        if (this.isClusterMode) {
+            cluster.worker.on('message', async(msg) => {
+                // console.log('Received msg pid =', process.pid, ' Msg:', msg);
+                if (msg.cmd && msg.cmd === 'employee.list') {
+                    let result = {
+                        cmd: 'employee.list.result',
+                        data: await SocketController.getEmployeeList(),
+                        socketid: msg.socketid
+                    };
+                    cluster.worker.send(result);
+                }
+            });
+        }
         return null;
     }
 
