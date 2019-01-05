@@ -83,7 +83,6 @@ class ApplicationClass {
     async startWorker() {
         if (this.isClusterMode) {
             cluster.worker.on('message', async(msg) => {
-                // console.log('Received msg pid =', process.pid, ' Msg:', msg);
                 if (msg.cmd && msg.cmd === 'employee.list') {
                     let result = {
                         cmd: 'employee.list.result',
