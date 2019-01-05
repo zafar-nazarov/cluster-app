@@ -56,7 +56,7 @@ class ApplicationClass {
                 socket.on('employee.list', async (params) => {
 
                     if (this.isClusterMode) {
-
+                        // Not using because of 'out of memory' error in unixCPU library
                         // async.map(this.worker_pids, utils.getCPU_Load, function (err, result) {
                         //     let resultArrWithoutNull = _.without(result, null);
                         //     let minObject = _.min(resultArrWithoutNull, function (resultArrWithoutNull) {
@@ -70,7 +70,6 @@ class ApplicationClass {
                         let workerId = this.worker_pids[rand].id;
                         let worker = cluster.workers[workerId];
                         worker.send({cmd: 'employee.list', socketid: socket.id});
-
                     }
                     else {
                         socket.emit('employee.list', await SocketController.getEmployeeList());
