@@ -18,6 +18,8 @@ class ApplicationClass {
         this.app = options.app;
         this.port = options.port;
         this.worker_pids = [];
+        this.server = {};
+        this.io = {};
     }
 
     async start() {
@@ -42,42 +44,39 @@ class ApplicationClass {
     }
 
     async startTransport() {
-        const server = http.Server(this.app).listen(this.port, () => {
+        this.server = http.Server(this.app).listen(this.port, () => {
             console.log(`${this.isMaster ? 'Master' : 'Worker'} ${process.pid} http instance started on port ${this.port}`);
         });
 
         if ( this.transport.isPermanentConnection ) {
-            const io = socketio(server);
+            this.io = socketio(this.server);
             console.log(`Permanent socket connection started`);
 
-            io.on('connection', (socket) => {
+            this.io.on('connection', (socket) => {
                 socket.on('employee.list', (params) => {
-
                     async.map(this.worker_pids, utils.getCPU_Load, function (err, result) {
                         let resultArrWithoutNull = _.without(result, null);
                         let minObject = _.min(resultArrWithoutNull, function (resultArrWithoutNull) {
                             return resultArrWithoutNull.cpu;
                         });
                         let worker = cluster.workers[minObject.id];
-                        // worker.send({ cmd: 'employee.list', socket: socket });
-                        let someHandle;
-                        worker.send({ cmd: 'employee.list' }, someHandle, (resp) => {
-                            console.log('resp', resp);
-                        });
+                        worker.send({ cmd: 'employee.list', socketid: socket.id });
                     });
-
                 })
-            })
+            });
         }
     }
 
     async startWorker() {
-        cluster.worker.on('message', async (msg, cb) => {
+        cluster.worker.on('message', async (msg) => {
             console.log('Received msg pid =', process.pid, ' Msg:', msg);
             if (msg.cmd && msg.cmd === 'employee.list') {
-                let resp = await SocketController.getEmployeeList();
-                // socket.emit('employee.list', resp);
-                cb(resp);
+                let result = {
+                    cmd: 'employee.list.result',
+                    data: await SocketController.getEmployeeList(),
+                    socketid: msg.socketid
+                };
+                cluster.worker.send(result);
             }
         });
         return null;
@@ -90,6 +89,13 @@ class ApplicationClass {
             this.worker_pids.push({"id": worker.id, "pid": worker.process.pid});
             console.log(`Worker ${worker.process.pid} started`);
         }
+
+        cluster.on('message', (worker, msg) => {
+            if (msg.cmd && msg.cmd === 'employee.list.result') {
+                this.io.to(msg.socketid).emit('employee.list', msg.data);
+            }
+        });
+
         return null;
     }
 
