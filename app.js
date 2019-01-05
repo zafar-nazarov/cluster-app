@@ -23,7 +23,7 @@ mongoose.connect('mongodb://localhost:27017/clusterapp', dbOptions);
 
 let appOptions = {
     transport: {
-        isPermanentConnection: true
+        isPermanentConnection: false
     },
     cluster: {
         enabled: true

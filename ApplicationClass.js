@@ -75,7 +75,6 @@ class ApplicationClass {
                         socket.emit('employee.list', await SocketController.getEmployeeList());
                     }
 
-
                 })
             });
         }
