@@ -15,6 +15,7 @@ class EmployeeController {
 
             res.json(resp);
             res.end();
+            return null;
 
         } catch (error) {
             res.end();

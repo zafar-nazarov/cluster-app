@@ -1,7 +1,8 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const routes = require('./routes');
-const Application = require('./ApplicationClass');
+const Application = require('./classes/ApplicationClass');
+const Transport = require('./classes/TransportClass');
 
 const app = express();
 app.use('/', routes);
@@ -17,10 +18,15 @@ const dbOptions = {
 };
 mongoose.connect('mongodb://localhost:27017/clusterapp', dbOptions);
 
+let transportOptions = {
+    app: app,
+    port: port,
+    isPermanentConnection: true
+};
+const transport = new Transport(transportOptions);
+
 let appOptions = {
-    transport: {
-        isPermanentConnection: false
-    },
+    transport: transport,
     cluster: {
         enabled: true
     },
